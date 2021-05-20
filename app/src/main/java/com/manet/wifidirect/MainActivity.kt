@@ -30,7 +30,10 @@ import java.net.Socket
 import java.util.concurrent.Executors
 
 var cxt : Context? = null;
-var socket : Socket? = null
+var socket = arrayOf<Socket>(Socket())
+var count : Int = 0
+var serverSocket = ServerSocket(8888);
+
 class MainActivity : AppCompatActivity() {
 
     var groupOwnerAddress: String? = null
@@ -48,7 +51,6 @@ class MainActivity : AppCompatActivity() {
     var deviceName : TextView? = null
     var textMsg : EditText? = null
 
-    var socket : Socket? = null
     var serverClass : com.manet.wifidirect.MainActivity.ServerClass? = null
     var clientClass : com.manet.wifidirect.MainActivity.ClientClass? = null
     var isHost : Boolean = false
@@ -277,7 +279,7 @@ class MainActivity : AppCompatActivity() {
 
 
     class ServerClass : Thread() {
-        var serverSocket: ServerSocket? = null
+        private var id = count;
         private var inputStream: InputStream? = null
         private var outputStream: OutputStream? = null
 
@@ -291,11 +293,9 @@ class MainActivity : AppCompatActivity() {
 
         override fun run() {
             try {
-                serverSocket = ServerSocket(8888)
-                socket = serverSocket!!.accept()
-
-                inputStream = socket!!.getInputStream()
-                outputStream = socket!!.getOutputStream()
+                socket[id] = serverSocket!!.accept()
+                inputStream = socket[id]!!.getInputStream()
+                outputStream = socket[id]!!.getOutputStream()
 
             } catch (e: IOException) {
                 e.printStackTrace()
@@ -305,7 +305,7 @@ class MainActivity : AppCompatActivity() {
             executorService.execute {
                 val buffer = ByteArray(1024)
                 var bytes: Int
-                while (socket != null) {
+                while (socket[id] != null) {
                     try {
                         bytes = inputStream!!.read(buffer)
                         if (bytes > 0) {
@@ -341,9 +341,9 @@ class MainActivity : AppCompatActivity() {
 
         override fun run() {
             try {
-                socket!!.connect(InetSocketAddress(HostAdd, 8888), 500)
-                inputStream = socket!!.getInputStream()
-                outputStream = socket!!.getOutputStream()
+                socket[count]!!.connect(InetSocketAddress(HostAdd, 8888), 500)
+                inputStream = socket[count]!!.getInputStream()
+                outputStream = socket[count]!!.getOutputStream()
             } catch (e: IOException) {
                 e.printStackTrace()
             }
@@ -352,7 +352,7 @@ class MainActivity : AppCompatActivity() {
             executorService.execute {
                 val buffer = ByteArray(1024)
                 var bytes: Int
-                while (socket != null) {
+                while (socket[count] != null) {
                     try {
                         bytes = inputStream!!.read(buffer)
                         if (bytes > 0) {
@@ -373,7 +373,7 @@ class MainActivity : AppCompatActivity() {
 
         init {
             HostAdd = inetAddress.hostAddress
-            socket = Socket() // EDIT
+            socket[count] = Socket() // EDIT
         }
     }
 
