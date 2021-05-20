@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/scan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Scan Nearby"
+        android:gravity="center_vertical" />
+    <Button
+        android:id="@+id/cgroup"
+        android:layout_below="@id/scan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Create Group"
+        android:gravity="center" />
+    <TextView
+        android:id="@+id/device"
+        android:layout_below="@id/cgroup"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:text="FINDING..."
+        android:gravity="center" />
+    <Button
+        android:id="@+id/connect"
+        android:layout_below="@id/device"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Connect"
+        android:gravity="center" />
+    <EditText
+        android:id="@+id/editView"
+        android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+        android:layout_below="@+id/connect"></EditText>
+    <Button
+        android:id="@+id/send"
+        android:layout_below="@id/editView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="send msg"
+        android:gravity="center" />
+</RelativeLayout>
