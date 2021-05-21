@@ -34,6 +34,27 @@ var socket = arrayOf<Socket>(Socket(),Socket())
 var count : Int = 0
 var serverSocket = ServerSocket(8888);
 var totalConnection : Int =0
+var serverClass = arrayOf<MainActivity.ServerClass>(
+    MainActivity.ServerClass(),
+    MainActivity.ServerClass()
+)
+var clientClass : com.manet.wifidirect.MainActivity.ClientClass? = null
+var isHost : Boolean = false
+public fun boardCast(msg : String)
+{
+    val executorService = Executors.newSingleThreadExecutor()
+    executorService.execute{
+        if(isHost)
+        {
+//                        serverClass!!.write(msg.toByteArray())
+            for(i in 0..totalConnection-1)
+            {
+                serverClass[i]!!.write(msg.toByteArray())
+            }
+
+        }
+    }
+}
 
 class MainActivity : AppCompatActivity() {
 
@@ -56,9 +77,7 @@ class MainActivity : AppCompatActivity() {
     var devices = arrayOf<String>("x","y")
     var arrayAdapter: ArrayAdapter<*>? = null
 
-    var serverClass = arrayOf<ServerClass>(ServerClass(), ServerClass())
-    var clientClass : com.manet.wifidirect.MainActivity.ClientClass? = null
-    var isHost : Boolean = false
+
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -163,6 +182,7 @@ class MainActivity : AppCompatActivity() {
         unregisterReceiver(receiver)
     }
 
+
     val connectionListener = WifiP2pManager.ConnectionInfoListener { info ->
 
         // String from WifiP2pInfo struct
@@ -193,6 +213,7 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+
     fun discoverPeers() {
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -302,7 +323,9 @@ class MainActivity : AppCompatActivity() {
 
 
     class ServerClass : Thread() {
+
         private var id = count;
+
         private var inputStream: InputStream? = null
         private var outputStream: OutputStream? = null
 
@@ -312,6 +335,7 @@ class MainActivity : AppCompatActivity() {
             } catch (e: IOException) {
                 e.printStackTrace()
             }
+
         }
 
         override fun run() {
@@ -336,8 +360,9 @@ class MainActivity : AppCompatActivity() {
                             handler.post(object : Runnable {
                                 override fun run() {
                                     val tempMsg = String(buffer, 0, finalBytes)
-                                    Toast.makeText(cxt, "tempMSG : $tempMsg", Toast.LENGTH_SHORT)
-                                        .show()
+                                    Toast.makeText(cxt, "tempMSG : $tempMsg", Toast.LENGTH_SHORT).show()
+                                    boardCast(tempMsg)
+
                                 }
                             })
                         }
