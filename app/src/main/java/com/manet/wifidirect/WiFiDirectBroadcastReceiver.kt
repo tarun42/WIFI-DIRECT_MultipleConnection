@@ -31,8 +31,14 @@ class WiFiDirectBroadcastReceiver(
             Log.d(TAG, peers.toString())
             Toast.makeText(activity, "Found a Device"+" List length : "+peers.size, Toast.LENGTH_SHORT).show()
             handler.post {
-
                 activity.deviceName?.text  = peers.get(0).deviceName
+                var ind =0;
+                for( peer in peers)
+                {
+                    activity.devices[ind]=peer.deviceName
+                    ind++;
+                    activity.arrayAdapter!!.notifyDataSetChanged()
+                }
             }
         }
         if (peers.isEmpty()) {

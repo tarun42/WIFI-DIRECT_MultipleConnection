@@ -13,10 +13,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -27,12 +24,16 @@ import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
+import java.util.*
 import java.util.concurrent.Executors
+import kotlin.collections.ArrayList
+
 
 var cxt : Context? = null;
-var socket = arrayOf<Socket>(Socket())
+var socket = arrayOf<Socket>(Socket(),Socket())
 var count : Int = 0
 var serverSocket = ServerSocket(8888);
+var totalConnection : Int =0
 
 class MainActivity : AppCompatActivity() {
 
@@ -44,6 +45,7 @@ class MainActivity : AppCompatActivity() {
 
     var receiver: WiFiDirectBroadcastReceiver? = null
     val LOCATION_REQUEST_CODE  = 0
+    var listView : ListView? = null
     var scan : Button? = null
     var create : Button? = null
     var connect : Button? = null
@@ -51,7 +53,10 @@ class MainActivity : AppCompatActivity() {
     var deviceName : TextView? = null
     var textMsg : EditText? = null
 
-    var serverClass : com.manet.wifidirect.MainActivity.ServerClass? = null
+    var devices = arrayOf<String>("x","y")
+    var arrayAdapter: ArrayAdapter<*>? = null
+
+    var serverClass = arrayOf<ServerClass>(ServerClass(), ServerClass())
     var clientClass : com.manet.wifidirect.MainActivity.ClientClass? = null
     var isHost : Boolean = false
     @RequiresApi(Build.VERSION_CODES.M)
@@ -59,8 +64,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        cxt = this
 
+
+        cxt = this
+        listView = findViewById<ListView>(R.id.litview) as ListView
         scan = findViewById<Button>(R.id.scan) as Button
         create = findViewById<Button>(R.id.cgroup) as Button
         connect = findViewById<Button>(R.id.connect) as Button
@@ -87,6 +94,16 @@ class MainActivity : AppCompatActivity() {
             checkLocationPermission(this)
         }
 
+
+
+        arrayAdapter = ArrayAdapter(this,
+            android.R.layout.simple_list_item_1, devices)
+        listView!!.adapter = arrayAdapter
+        listView!!.setOnItemClickListener { parent, view, position, id ->
+//            Toast.makeText(this,devices[position],Toast.LENGTH_SHORT).show()
+            connectPeer(receiver!!.peers.get(0))
+
+        }
         create!!.setOnClickListener(View.OnClickListener {
             connectGroup(this)
         })
@@ -99,6 +116,7 @@ class MainActivity : AppCompatActivity() {
         })
 
         send!!.setOnClickListener(View.OnClickListener {
+
             var msg = textMsg!!.text.toString()
             if(!msg.isNullOrEmpty())
             {
@@ -106,7 +124,11 @@ class MainActivity : AppCompatActivity() {
                 executorService.execute{
                     if(isHost)
                     {
-                        serverClass!!.write(msg.toByteArray())
+//                        serverClass!!.write(msg.toByteArray())
+                        for(i in 0..totalConnection-1)
+                        {
+                            serverClass[i]!!.write(msg.toByteArray())
+                        }
 
                     }
                     else
@@ -156,8 +178,9 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this,"I am Host Now",Toast.LENGTH_SHORT).show()
             Log.d(TAG,"======================THIS DEVICE IS HOST======================")
             isHost = true
-            serverClass = ServerClass()
-            serverClass!!.start()
+
+            serverClass[totalConnection++]!!.start()
+
         } else if (info.groupFormed) {
             // The other device acts as the peer (client). In this case,
             // you'll want to create a peer thread that connects
